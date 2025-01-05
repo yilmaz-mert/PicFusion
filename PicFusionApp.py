@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QFileDialog, QListWidget, QPushButton
 )
 from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import Qt
 from PIL import Image
 from PicFusion_ui import Ui_MainWindow
 
@@ -12,16 +13,57 @@ def set_app_user_model_id(app_id: str):
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
 
 
+class DragDropListWidget(QListWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAcceptDrops(True)
+        self.setDragEnabled(True)
+        self.setDefaultDropAction(Qt.DropAction.MoveAction)
+        self.setDragDropMode(QListWidget.DragDropMode.InternalMove)
+        self.setSelectionMode(QListWidget.SelectionMode.MultiSelection)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls() or event.source() == self:
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasUrls() or event.source() == self:
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+            for url in event.mimeData().urls():
+                file_path = url.toLocalFile()
+                if file_path.endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+                    self.addItem(file_path)
+        elif event.source() == self:
+            super().dropEvent(event)
+        else:
+            event.ignore()
+
+
 class ImageMergerApp(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.setWindowIcon(QIcon('icon.ico'))
 
+        self.image_list = self.findChild(QListWidget, 'imageListWidget')
+        self.drag_drop_list = DragDropListWidget(self)
+        self.drag_drop_list.setGeometry(self.image_list.geometry())
+        self.drag_drop_list.setObjectName('imageListWidget')
+        self.image_list.parent().layout().replaceWidget(self.image_list, self.drag_drop_list)
+        self.image_list.deleteLater()
+        self.image_list = self.drag_drop_list
+
         self.add_button = self.findChild(QPushButton, 'addButton')
         self.remove_button = self.findChild(QPushButton, 'removeButton')
         self.merge_button = self.findChild(QPushButton, 'mergeButton')
-        self.image_list = self.findChild(QListWidget, 'imageListWidget')
 
         self.add_button.clicked.connect(self.add_images)
         self.remove_button.clicked.connect(self.remove_selected_images)
