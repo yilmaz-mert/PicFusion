@@ -1,6 +1,8 @@
-# PicFusionApp
+# PicFusion
 
-PicFusionApp is a simple yet powerful tool that allows you to merge multiple images vertically into a single image. You can reorder the images in the list and save the final merged result.
+PicFusion is a simple yet powerful tool that allows you to merge multiple images vertically into a single image. You can reorder the images in the list and save the final merged result.
+
+![image](https://github.com/user-attachments/assets/a4e25d10-fabe-48b3-98eb-7214b01ebb6b)
 
 ## Features
 - **Drag-and-drop support**: Easily drag and drop images into the application.
