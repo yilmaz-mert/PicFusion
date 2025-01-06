@@ -1,13 +1,13 @@
 # PicFusion
 
-PicFusion is a simple yet powerful tool that allows you to merge multiple images vertically into a single image. You can reorder the images in the list and save the final merged result.
+PicFusion is a simple yet powerful tool that allows you to merge multiple images vertically, horizontally, or in a grid into a single image. You can reorder the images in the list and save the final merged result
 
-![image](https://github.com/user-attachments/assets/a4e25d10-fabe-48b3-98eb-7214b01ebb6b)
+![image](https://github.com/user-attachments/assets/a3ed111f-192f-42b1-ada2-5a699d5f989f)
 
 ## Features
 - **Drag-and-drop support**: Easily drag and drop images into the application.
 - **Reordering**: Change the order of images before merging.
-- **Vertical merging**: Combine selected images vertically into one.
+- **Vertical, horizontal, and grid merging**: Combine selected images vertically, horizontally, or in a grid layout into one.
 - **Save merged image**: Save the final merged image in various formats (e.g., `.png`, `.jpg`).
 
 ## Requirements
