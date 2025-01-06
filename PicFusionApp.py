@@ -1,3 +1,7 @@
+# Author: yilmaz-mert
+# Version: 1.0.0
+# Date: 2025-01-05
+
 import sys
 import ctypes
 from PyQt6.QtWidgets import (
