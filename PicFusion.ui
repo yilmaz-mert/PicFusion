@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -24,7 +24,7 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>400</width>
+    <width>16777215</width>
     <height>16777215</height>
    </size>
   </property>
@@ -36,16 +36,7 @@
     <normaloff>icon.ico</normaloff>icon.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
-    <property name="leftMargin">
-     <number>10</number>
-    </property>
-    <property name="rightMargin">
-     <number>10</number>
-    </property>
-    <property name="bottomMargin">
-     <number>10</number>
-    </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QLabel" name="label">
       <property name="text">
@@ -70,25 +61,55 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="addButton">
-      <property name="text">
-       <string>Add Images</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="removeButton">
-      <property name="text">
-       <string>Remove Selected</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPushButton" name="mergeButton">
-      <property name="text">
-       <string>Merge Images</string>
-      </property>
-     </widget>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="2" column="0">
+       <widget class="QPushButton" name="mergeButton">
+        <property name="text">
+         <string>Merge Images</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QCheckBox" name="ResizecheckBox">
+        <property name="text">
+         <string>Resize</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QPushButton" name="addButton">
+        <property name="text">
+         <string>Add Images</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="removeButton">
+        <property name="text">
+         <string>Remove Selected</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QComboBox" name="comboBox">
+        <item>
+         <property name="text">
+          <string>Vertical</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Horizontal</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Grid</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
