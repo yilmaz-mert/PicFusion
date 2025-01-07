@@ -66,10 +66,13 @@ If you'd like to build the `.exe` file yourself, follow these steps:
 3. The compiled `.exe` file will be available in the `dist` folder.
 
 ## How It Works
-1. Drag and drop image files into the application, or use the **Add Images** button to select files.
-2. Rearrange the images in the desired order.
-3. Click the **Merge Images** button to combine the images vertically.
-4. Save the merged image to your preferred location.
+
+1. **Add Images**: Drag and drop image files into the application, or use the "Add Images" button to select files.
+2. **Preview and Rearrange**: Preview the images and rearrange them in the desired order.
+3. **Resize Images (Optional)**: Optionally, resize the images before merging them.
+4. **Merge Images**: Choose the merge option (vertical, horizontal, or grid) and click the "Merge Images" button to combine the images.
+5. **Save Merged Image**: Save the final merged image to your preferred location in various formats (e.g., `.png`, `.jpg`).
+6. **Notifications**: Receive notification messages when the save operation is either completed or canceled.
 
 ## License
 
