@@ -2,6 +2,18 @@
 # Version: 1.1.6
 # Date: 2025-01-06
 
+"""
+This is a simple image merger application that allows users to merge multiple images into a single image.
+The user can select multiple images from their file system, choose the layout type (vertical, horizontal, or grid),
+and resize the images to the smallest dimensions before merging.
+The merged image can be saved to the file system.
+
+Python 3.12.3
+PyQt6 6.8.0
+Pillow 11.1.0
+PyInstaller 6.11.1
+"""
+
 import sys
 import ctypes
 from PyQt6.QtWidgets import (
@@ -33,18 +45,21 @@ class DragDropListWidget(QListWidget):
         self.setIconSize(ICON_SIZE)
 
     def dragEnterEvent(self, event):
+        # Accept the drag event if it contains URLs or if the source is the same list widget
         if event.mimeData().hasUrls() or event.source() == self:
             event.accept()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
+        # Accept the drag move event if it contains URLs or if the source is the same list widget
         if event.mimeData().hasUrls() or event.source() == self:
             event.accept()
         else:
             event.ignore()
 
     def dropEvent(self, event):
+        # Handle the drop event to add images to the list
         if event.mimeData().hasUrls():
             event.accept()
             for url in event.mimeData().urls():
@@ -57,6 +72,7 @@ class DragDropListWidget(QListWidget):
             event.ignore()
 
     def add_image_item(self, file_path):
+        # Add an image item to the list widget
         try:
             pixmap = QPixmap(file_path)
             icon = QIcon(pixmap.scaled(ICON_SIZE, Qt.AspectRatioMode.KeepAspectRatio))
@@ -68,6 +84,7 @@ class DragDropListWidget(QListWidget):
             print(f"Error loading image {file_path}: {e}")
 
     def event(self, event):
+        # Show tooltip when hovering over an item
         if event.type() == QEvent.Type.ToolTip:
             item = self.itemAt(event.pos())
             if item:
@@ -116,9 +133,11 @@ class ImageMergerApp(QMainWindow, Ui_MainWindow):
         self.image_list.setLayout(self.current_layout)
 
     def add_image_item(self, file_path):
+        # Add an image item to the list widget
         self.drag_drop_list.add_image_item(file_path)
 
     def add_images(self):
+        # Open a file dialog to select images
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.FileMode.ExistingFiles)
         file_dialog.setNameFilter("Images (*.png *.jpg *.jpeg *.bmp)")
@@ -129,11 +148,13 @@ class ImageMergerApp(QMainWindow, Ui_MainWindow):
                 self.add_image_item(file_path)
 
     def remove_selected_images(self):
+        # Remove selected images from the list
         for item in self.image_list.selectedItems():
             self.image_list.takeItem(self.image_list.row(item))
 
     @staticmethod
     def clear_layout(layout):
+        # Clear the layout by removing all widgets
         if layout is not None:
             while layout.count():
                 child = layout.takeAt(0)
