@@ -1,13 +1,13 @@
 # PicFusion
 
-PicFusion is a simple yet powerful tool that allows you to merge multiple images vertically into a single image. You can reorder the images in the list and save the final merged result.
+PicFusion is a simple yet powerful tool that allows you to merge multiple images vertically, horizontally, or in a grid into a single image. You can reorder the images in the list and save the final merged result
 
-![image](https://github.com/user-attachments/assets/a4e25d10-fabe-48b3-98eb-7214b01ebb6b)
+![image](https://github.com/user-attachments/assets/a3ed111f-192f-42b1-ada2-5a699d5f989f)
 
 ## Features
 - **Drag-and-drop support**: Easily drag and drop images into the application.
 - **Reordering**: Change the order of images before merging.
-- **Vertical merging**: Combine selected images vertically into one.
+- **Vertical, horizontal, and grid merging**: Combine selected images vertically, horizontally, or in a grid layout into one.
 - **Save merged image**: Save the final merged image in various formats (e.g., `.png`, `.jpg`).
 
 ## Requirements
@@ -66,10 +66,13 @@ If you'd like to build the `.exe` file yourself, follow these steps:
 3. The compiled `.exe` file will be available in the `dist` folder.
 
 ## How It Works
-1. Drag and drop image files into the application, or use the **Add Images** button to select files.
-2. Rearrange the images in the desired order.
-3. Click the **Merge Images** button to combine the images vertically.
-4. Save the merged image to your preferred location.
+
+1. **Add Images**: Drag and drop image files into the application, or use the "Add Images" button to select files.
+2. **Preview and Rearrange**: Preview the images and rearrange them in the desired order.
+3. **Resize Images (Optional)**: Optionally, resize the images before merging them.
+4. **Merge Images**: Choose the merge option (vertical, horizontal, or grid) and click the "Merge Images" button to combine the images.
+5. **Save Merged Image**: Save the final merged image to your preferred location in various formats (e.g., `.png`, `.jpg`).
+6. **Notifications**: Receive notification messages when the save operation is either completed or canceled.
 
 ## License
 
