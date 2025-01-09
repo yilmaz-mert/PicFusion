@@ -19,6 +19,13 @@ class DraggableLabel(QLabel):
         self.setMinimumSize(100, 100)
         self.selected = False
 
+        self.selection_overlay = QLabel(self)
+        self.selection_overlay.setStyleSheet("""
+            background-color: rgba(0, 123, 255, 0.3);
+            border: 2px solid #007BFF;
+        """)
+        self.selection_overlay.hide()
+
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.selected = not self.selected
@@ -34,26 +41,18 @@ class DraggableLabel(QLabel):
 
     def update_selection_border(self):
         if self.selected:
-            self.setStyleSheet("""
-                QLabel {
-                    border: 2px solid #007BFF; /* Daha hoş bir mavi renk */
-                    border-radius: 10px; /* Köşeleri daha yuvarlak yap */
-                    box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.5); /* Hafif bir gölge efekti ekle */
-                    background-color: rgba(0, 123, 255, 0.1); /* Hafif bir arka plan rengi */
-                    z-index: 1; /* Diğer widget'ların üzerine çık */
-                }
-            """)
+            self.selection_overlay.setGeometry(0, 0, self.width(), self.height())
+            self.selection_overlay.show()
         else:
-            self.setStyleSheet("""
-                QLabel {
-                    border: none;
-                    box-shadow: none;
-                    background-color: none;
-                }
-            """)
+            self.selection_overlay.hide()
 
     def resize_pixmap(self, width, height):
         self.setPixmap(self.original_pixmap.scaled(width, height, Qt.AspectRatioMode.KeepAspectRatio))
+        self.selection_overlay.setGeometry(0, 0, width, height)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.selection_overlay.setGeometry(0, 0, self.width(), self.height())
 
 
 class GridWidget(QWidget):
@@ -116,10 +115,6 @@ class GridWidget(QWidget):
                     event.ignore()
             else:
                 event.ignore()
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        self.update_grid()
 
     def update_grid(self):
         if not self.labels:
@@ -196,7 +191,6 @@ class GridWidget(QWidget):
         return 1, 1
 
     def mergeImages(self):
-        print("Merging images...")
         if not self.labels:
             QMessageBox.warning(self, "Warning", "No images to merge")
             return
@@ -207,13 +201,10 @@ class GridWidget(QWidget):
             return
 
         try:
-            # Checkbox kontrolü
             if self.parent.ui.ResizeImagecheckBox.isChecked():
-                # En büyük genişlik ve yükseklik değerlerini kullanarak birleşik görüntünün boyutunu belirle
                 width = max(image.width() for image in images)
                 height = max(image.height() for image in images)
             else:
-                # Orijinal boyutları kullanarak birleşik görüntünün boyutunu belirle
                 width = images[0].width()
                 height = images[0].height()
 
@@ -247,6 +238,7 @@ class GridWidget(QWidget):
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"An error occurred: {e}")
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
