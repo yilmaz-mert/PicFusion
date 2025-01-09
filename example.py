@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGridLayout, QWidget, QLabel
+from PyQt6.QtWidgets import QMessageBox, QApplication, QMainWindow, QFileDialog, QGridLayout, QWidget, QLabel
 from PyQt6.QtGui import QPixmap, QDrag, QPainter
 from PyQt6.QtCore import Qt, QMimeData
 import os
@@ -196,28 +196,57 @@ class GridWidget(QWidget):
         return 1, 1
 
     def mergeImages(self):
+        print("Merging images...")
         if not self.labels:
+            QMessageBox.warning(self, "Warning", "No images to merge")
             return
 
-        images = [label.pixmap().toImage() for label in self.labels]
+        images = [label.original_pixmap.toImage() for label in self.labels]
         if not images:
+            QMessageBox.warning(self, "Warning", "No valid images found")
             return
 
-        width = max(image.width() for image in images)
-        height = max(image.height() for image in images)
+        try:
+            # Checkbox kontrolü
+            if self.parent.ui.ResizeImagecheckBox.isChecked():
+                # En büyük genişlik ve yükseklik değerlerini kullanarak birleşik görüntünün boyutunu belirle
+                width = max(image.width() for image in images)
+                height = max(image.height() for image in images)
+            else:
+                # Orijinal boyutları kullanarak birleşik görüntünün boyutunu belirle
+                width = images[0].width()
+                height = images[0].height()
 
-        merged_image = QPixmap(width * self.cols, height * self.rows)
-        merged_image.fill(Qt.GlobalColor.transparent)
+            print(f"Image dimensions: width={width}, height={height}, cols={self.cols}, rows={self.rows}")
 
-        painter = QPainter(merged_image)
-        for index, image in enumerate(images):
-            row = index // self.cols
-            col = index % self.cols
-            painter.drawImage(col * width, row * height, image)
-        painter.end()
+            merged_image = QPixmap(width * self.cols, height * self.rows)
+            merged_image.fill(Qt.GlobalColor.transparent)
 
-        merged_image.save('merged_image.png')
+            painter = QPainter(merged_image)
+            for index, image in enumerate(images):
+                row = index // self.cols
+                col = index % self.cols
+                print(f"Drawing image at row={row}, col={col}, x={col * width}, y={row * height}")
+                painter.drawImage(col * width, row * height, image)
+            painter.end()
 
+            # Save the merged image with a user-defined filename and format
+            file_path, _ = QFileDialog.getSaveFileName(self, "Save Merged Image", "",
+                                                       "PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*)")
+
+            if file_path:
+                file_extension = os.path.splitext(file_path)[1].lower()
+                if file_extension not in ['.png', '.jpg', '.jpeg']:
+                    QMessageBox.critical(self, "Error", "Unsupported file format. Please use .png or .jpg")
+                    return
+
+                merged_image.save(file_path)
+                QMessageBox.information(self, "Success", f"Merged image saved as {file_path}")
+            else:
+                QMessageBox.information(self, "Cancelled", "Save operation cancelled")
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred: {e}")
 
 class MainWindow(QMainWindow):
     def __init__(self):
