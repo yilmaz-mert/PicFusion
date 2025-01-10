@@ -1,3 +1,25 @@
+"""
+ This code is under development.
+
+ This script is part of the PicFusion project and is currently a work in progress.
+ The primary objective of this code is to provide a graphical user interface (GUI)
+for managing and merging images using PyQt6.
+
+ The application allows users to:
+ - Drag and drop images into a grid layout.
+ - Select, move, and remove images within the grid.
+ - Merge selected images into a single image and save the result.
+
+ Please note that this script is not yet complete and may contain bugs or incomplete
+features. The development process is ongoing, and the code will be updated frequently.
+
+ If you encounter any issues or have suggestions for improvements, please feel free to
+contribute to the project or report issues on the project's GitHub repository.
+
+ Thank you for your understanding and support as we continue to develop and improve
+this application.
+"""
+
 from PyQt6.QtWidgets import QMessageBox, QApplication, QMainWindow, QFileDialog, QGridLayout, QWidget, QLabel
 from PyQt6.QtGui import QPixmap, QDrag, QPainter
 from PyQt6.QtCore import Qt, QMimeData
@@ -12,12 +34,14 @@ from example_ui import Ui_MainWindow
 class DraggableLabel(QLabel):
     def __init__(self, pixmap, filename):
         super().__init__()
+        self.drag_start_position = None
         self.original_pixmap = pixmap
         self.setPixmap(pixmap)
         self.setToolTip(filename)
         self.setScaledContents(True)
         self.setMinimumSize(100, 100)
         self.selected = False
+        self.dragging = False
 
         self.selection_overlay = QLabel(self)
         self.selection_overlay.setStyleSheet("""
@@ -28,16 +52,26 @@ class DraggableLabel(QLabel):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_start_position = event.pos()
+            self.dragging = False
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() == Qt.MouseButton.LeftButton:
+            distance = (event.pos() - self.drag_start_position).manhattanLength()
+            if distance >= QApplication.startDragDistance():
+                self.dragging = True  
+                drag = QDrag(self)
+                mime_data = QMimeData()
+                mime_data.setImageData(self.pixmap().toImage())
+                drag.setMimeData(mime_data)
+                drag.setPixmap(self.pixmap())
+                drag.setHotSpot(event.pos() - self.rect().topLeft())
+                drag.exec(Qt.DropAction.MoveAction)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton and not self.dragging:
             self.selected = not self.selected
             self.update_selection_border()
-
-        drag = QDrag(self)
-        mime_data = QMimeData()
-        mime_data.setImageData(self.pixmap().toImage())
-        drag.setMimeData(mime_data)
-        drag.setPixmap(self.pixmap())
-        drag.setHotSpot(event.pos() - self.rect().topLeft())
-        drag.exec(Qt.DropAction.MoveAction)
 
     def update_selection_border(self):
         if self.selected:
@@ -93,6 +127,8 @@ class GridWidget(QWidget):
                     filename = os.path.basename(file_path)
                     self.addImage(pixmap, filename)
 
+            self.parent.ui.RowspinBox.setEnabled(True)
+            self.parent.ui.ColumnspinBox.setEnabled(True)
             self.updateSpinboxes()
             event.acceptProposedAction()
 
@@ -202,23 +238,31 @@ class GridWidget(QWidget):
 
         try:
             if self.parent.ui.ResizeImagecheckBox.isChecked():
-                width = max(image.width() for image in images)
-                height = max(image.height() for image in images)
+                # Tüm görüntüleri minimum boyuta getirmek için minimum genişlik ve yükseklik belirlenir
+                min_width = min(image.width() for image in images)
+                min_height = min(image.height() for image in images)
+                # Görsellerin yeniden boyutlandırılması, her görüntüyü minimum boyutlara tam sığacak şekilde
+                resized_images = [
+                    image.scaled(min_width, min_height, Qt.AspectRatioMode.IgnoreAspectRatio,
+                                 Qt.TransformationMode.SmoothTransformation)
+                    for image in images
+                ]
             else:
-                width = images[0].width()
-                height = images[0].height()
+                min_width = images[0].width()
+                min_height = images[0].height()
+                resized_images = images
 
-            print(f"Image dimensions: width={width}, height={height}, cols={self.cols}, rows={self.rows}")
+            print(f"Image dimensions: width={min_width}, height={min_height}, cols={self.cols}, rows={self.rows}")
 
-            merged_image = QPixmap(width * self.cols, height * self.rows)
+            merged_image = QPixmap(min_width * self.cols, min_height * self.rows)
             merged_image.fill(Qt.GlobalColor.transparent)
 
             painter = QPainter(merged_image)
-            for index, image in enumerate(images):
+            for index, image in enumerate(resized_images):
                 row = index // self.cols
                 col = index % self.cols
-                print(f"Drawing image at row={row}, col={col}, x={col * width}, y={row * height}")
-                painter.drawImage(col * width, row * height, image)
+                print(f"Drawing image at row={row}, col={col}, x={col * min_width}, y={row * min_height}")
+                painter.drawImage(col * min_width, row * min_height, image)
             painter.end()
 
             # Save the merged image with a user-defined filename and format
@@ -254,6 +298,8 @@ class MainWindow(QMainWindow):
         self.ui.MergeButton.clicked.connect(self.merge_images)
         self.ui.RowspinBox.valueChanged.connect(self.update_rows)
         self.ui.ColumnspinBox.valueChanged.connect(self.update_cols)
+        self.ui.RowspinBox.setEnabled(False)
+        self.ui.ColumnspinBox.setEnabled(False)
         self.ui.VerticallycheckBox.stateChanged.connect(self.vertical_layout)
         self.ui.HorizontallycheckBox.stateChanged.connect(self.horizontal_layout)
 
@@ -277,6 +323,8 @@ class MainWindow(QMainWindow):
                 filename = os.path.basename(path)
                 self.grid_widget.addImage(pixmap, filename)
 
+            self.ui.RowspinBox.setEnabled(True)
+            self.ui.ColumnspinBox.setEnabled(True)
             self.grid_widget.updateSpinboxes()
 
     def remove_images(self):
