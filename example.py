@@ -262,10 +262,8 @@ class GridWidget(QWidget):
 
         try:
             if self.parent.ui.ResizeImagecheckBox.isChecked():
-                # Tüm görüntüleri minimum boyuta getirmek için minimum genişlik ve yükseklik belirlenir
                 min_width = min(image.width() for image in images)
                 min_height = min(image.height() for image in images)
-                # Görsellerin yeniden boyutlandırılması, her görüntüyü minimum boyutlara tam sığacak şekilde
                 resized_images = [
                     image.scaled(min_width, min_height, Qt.AspectRatioMode.IgnoreAspectRatio,
                                  Qt.TransformationMode.SmoothTransformation)
@@ -289,7 +287,6 @@ class GridWidget(QWidget):
                 painter.drawImage(col * min_width, row * min_height, image)
             painter.end()
 
-            # Save the merged image with a user-defined filename and format
             file_path, _ = QFileDialog.getSaveFileName(self, "Save Merged Image", "",
                                                        "PNG Files (*.png);;JPEG Files (*.jpg);;All Files (*)")
 
