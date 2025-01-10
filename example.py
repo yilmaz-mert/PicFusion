@@ -34,7 +34,6 @@ from example_ui import Ui_MainWindow
 class DraggableLabel(QLabel):
     def __init__(self, pixmap, filename):
         super().__init__()
-        self.drag_start_position = None
         self.original_pixmap = pixmap
         self.setPixmap(pixmap)
         self.setToolTip(filename)
@@ -42,12 +41,13 @@ class DraggableLabel(QLabel):
         self.setMinimumSize(100, 100)
         self.selected = False
         self.dragging = False
+        self.placeholder = None
 
         self.selection_overlay = QLabel(self)
         self.selection_overlay.setStyleSheet("""
-            background-color: rgba(0, 123, 255, 0.3);
-            border: 2px solid #007BFF;
-        """)
+                background-color: rgba(0, 123, 255, 0.3);
+                border: 2px solid #007BFF;
+            """)
         self.selection_overlay.hide()
 
     def mousePressEvent(self, event):
@@ -59,19 +59,44 @@ class DraggableLabel(QLabel):
         if event.buttons() == Qt.MouseButton.LeftButton:
             distance = (event.pos() - self.drag_start_position).manhattanLength()
             if distance >= QApplication.startDragDistance():
-                self.dragging = True  
+                self.dragging = True
                 drag = QDrag(self)
                 mime_data = QMimeData()
                 mime_data.setImageData(self.pixmap().toImage())
                 drag.setMimeData(mime_data)
                 drag.setPixmap(self.pixmap())
                 drag.setHotSpot(event.pos() - self.rect().topLeft())
-                drag.exec(Qt.DropAction.MoveAction)
+                self.create_placeholder()
+
+                if self.selected:
+                    self.selected = False
+                    self.update_selection_border()
+
+                drop_action = drag.exec(Qt.DropAction.MoveAction)
+                if drop_action == Qt.DropAction.IgnoreAction:
+                    self.remove_placeholder()
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton and not self.dragging:
             self.selected = not self.selected
             self.update_selection_border()
+
+    def create_placeholder(self):
+        if self.placeholder is None:
+            self.placeholder = QLabel(self.parent())
+            self.placeholder.setGeometry(self.geometry())
+            self.placeholder.setStyleSheet("""
+                    background-color: rgba(0, 123, 255, 0.1);
+                    border: 2px dashed #007BFF;
+                    background-image: linear-gradient(45deg, rgba(0, 123, 255, 0.1) 25%, transparent 25%, transparent 50%, rgba(0, 123, 255, 0.1) 50%, rgba(0, 123, 255, 0.1) 75%, transparent 75%, transparent);
+                    background-size: 10px 10px;
+                """)
+            self.placeholder.show()
+
+    def remove_placeholder(self):
+        if self.placeholder is not None:
+            self.placeholder.deleteLater()
+            self.placeholder = None
 
     def update_selection_border(self):
         if self.selected:
@@ -127,8 +152,6 @@ class GridWidget(QWidget):
                     filename = os.path.basename(file_path)
                     self.addImage(pixmap, filename)
 
-            self.parent.ui.RowspinBox.setEnabled(True)
-            self.parent.ui.ColumnspinBox.setEnabled(True)
             self.updateSpinboxes()
             event.acceptProposedAction()
 
@@ -140,11 +163,12 @@ class GridWidget(QWidget):
                 source = event.source()
                 if isinstance(source, DraggableLabel):
                     source_row, source_col, _, _ = self.layout.getItemPosition(self.layout.indexOf(source))
-                    # Swap the positions of the source and target labels
                     self.layout.removeWidget(source)
                     self.layout.removeWidget(widget)
                     self.layout.addWidget(source, row, col)
                     self.layout.addWidget(widget, source_row, source_col)
+                    source.remove_placeholder()
+
                     event.setDropAction(Qt.DropAction.MoveAction)
                     event.accept()
                 else:
